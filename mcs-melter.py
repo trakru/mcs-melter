@@ -1,12 +1,31 @@
+"""
+WARNING: This code is old and needs to be migrated to reflect new updates.
+DO NOT USE
+"""
+
+
 #load libraries
 import pandas as pd
 import glob
 from pathlib import Path
+import boto3
+from utils.saml_util import samlapi_formauth
 
 # Provide local file path
 RAW_FILE_FOLDER = './data/raw/'
 FINAL_FILE_FOLDER = './data/final/'
 RADIOSTATS_FILE = glob.glob(RAW_FILE_FOLDER + '*.csv')
+
+# provide s3 Path & file locations
+# session = boto3.session.Session(profile_name='saml')
+# s3 = session.resource('s3')
+
+# my_bucket = s3.Bucket('some/path/')
+
+# for my_bucket_object in my_bucket.objects.all():
+#     print(my_bucket_object)
+
+# mybucket.objects.filter(Prefix='foo/bar')
 
 # Read csv and provide manipulations
 df = pd.read_csv(RADIOSTATS_FILE[0])
