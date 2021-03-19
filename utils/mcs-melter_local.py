@@ -5,11 +5,16 @@ DO NOT USE
 
 
 #load libraries
+import awswrangler as wr
 import pandas as pd
 import glob
 from pathlib import Path
 import boto3
-from utils.saml_util import samlapi_formauth
+from saml_util import samlapi_formauth
+import os
+
+#go up a directory
+os.chdir(Path().resolve().parents[0])
 
 # Provide local file path
 RAW_FILE_FOLDER = './data/raw/'
@@ -19,6 +24,15 @@ RADIOSTATS_FILE = glob.glob(RAW_FILE_FOLDER + '*.csv')
 # provide s3 Path & file locations
 # session = boto3.session.Session(profile_name='saml')
 # s3 = session.resource('s3')
+
+
+# reading parquet files
+
+# parquet_bucket = 's3://xwifi-od-s3-parquet/snmp/type=radiostatsMCS/*'
+# result = wr.s3.list_objects(parquet_bucket, boto3_session=session)
+
+# # initialize dataframe
+# df = wr.s3.read_parquet(result[0], boto3_session=session)
 
 # my_bucket = s3.Bucket('some/path/')
 
