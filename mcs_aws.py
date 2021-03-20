@@ -3,6 +3,7 @@
 import boto3
 import awswrangler as wr
 import pandas as pd
+import time
 
 # create boto session
 
@@ -13,10 +14,18 @@ s3 = session.resource('s3')
 
 parquet_bucket = 's3://xwifi-od-s3-parquet/snmp/type=radiostatsMCS/*'
 final_processing_bucket = 's3://xwifi-od-s3-testingbkt/type=radiostatsMCS/'
-result = wr.s3.list_objects(parquet_bucket, boto3_session=session)
+# result = wr.s3.list_objects(parquet_bucket, boto3_session=session)
 
-## Defining two sets of helper functions to apply astype & sum functions across large number of columns
+# temp condition for testing
+result = result[0:4]
 
+# create the result list for processing
+# to-do: get & sort filename from parquet & final buckets
+# processed_results = wr.s3.list_objects(final_processing_bucket, boto3_session=session)
+# raw_result = wr.s3.list_objects(parquet_bucket, boto3_session=session)
+
+# Create a column list to select only the numeric columns 
+# Defining two sets of helper functions to apply astype & sum functions across selected columns
 
 def column_list_maker(df):
     """creates a list of columns that starts with 2.4 & 5"""
@@ -52,7 +61,8 @@ def s3_read_parquet(item):
     df = pd.melt(df, id_vars=['date', 'snmpreportedmac'], value_vars=column_list_maker(df))
     df['sort_order'] = df['variable'].str.extract(r'[2,5]\.?[4]?_\w{2}_mcs(\d*)')
     df['transmission_type'] = df['variable'].str.extract(r'[2,5]\.?[4]?_(\w{2})_mcs\d*')
-    df['radio_type'] = df['variable'].str.extract(r'([2,5]\.?[4]?)_\w{2}_mcs\d*') 
+    df['radio_type'] = df['variable'].str.extract(r'([2,5]\.?[4]?)_\w{2}_mcs\d*')
+    df['dt'] = df['date'].astype(str).str.extract(r'(\d{4}-\d{2})-\d{2}')
     return df
 
 
@@ -65,7 +75,10 @@ def s3_write_to_parquet(df):
         df=df,
         path=final_processing_bucket,
         dataset=True,
-        boto3_session=session
+        boto3_session=session,
+        partition_cols=['dt'],
+        database='test-table',  # Athena/Glue database
+        table='radiostatsMCS_melted_parquet'  # Athena/Glue table
     )
 
 def mcs_melter_aws(item):
@@ -74,7 +87,10 @@ def mcs_melter_aws(item):
 # Final execution loop
 def s3_melt_parquet():
     for item in result:
+        start_time=time.time()
+        print(f'processing {item}')
         mcs_melter_aws(item)
+        print(f'Processing complete in {time.time()-start_time} seconds')
 
 if __name__=='__main__':
     s3_melt_parquet()

@@ -16,10 +16,14 @@ import os
 #go up a directory
 os.chdir(Path().resolve().parents[0])
 
+p = Path('data','raw')
+# final_path = Path('data','final','testfile.csv')
+RADIOSTATS_FILE = [file for file in p.glob('*.csv')]
+
 # Provide local file path
 RAW_FILE_FOLDER = './data/raw/'
 FINAL_FILE_FOLDER = './data/final/'
-RADIOSTATS_FILE = glob.glob(RAW_FILE_FOLDER + '*.csv')
+# RADIOSTATS_FILE = glob.glob(RAW_FILE_FOLDER + '*.csv')
 
 # provide s3 Path & file locations
 # session = boto3.session.Session(profile_name='saml')
