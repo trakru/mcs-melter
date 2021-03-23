@@ -14,7 +14,7 @@ s3 = session.resource('s3')
 
 parquet_bucket = 's3://xwifi-od-s3-parquet/snmp/type=radiostatsMCS/*'
 final_processing_bucket = 's3://xwifi-od-s3-testingbkt/type=radiostatsMCS/'
-# result = wr.s3.list_objects(parquet_bucket, boto3_session=session)
+result = wr.s3.list_objects(parquet_bucket, boto3_session=session)
 
 # temp condition for testing
 result = result[0:4]
@@ -77,8 +77,8 @@ def s3_write_to_parquet(df):
         dataset=True,
         boto3_session=session,
         partition_cols=['dt'],
-        database='test-table',  # Athena/Glue database
-        table='radiostatsMCS_melted_parquet'  # Athena/Glue table
+        database='datalake_final',  # Athena/Glue database
+        table='radiostatsMCS_melted'  # Athena/Glue table
     )
 
 def mcs_melter_aws(item):
@@ -88,9 +88,9 @@ def mcs_melter_aws(item):
 def s3_melt_parquet():
     for item in result:
         start_time=time.time()
-        print(f'processing {item}')
+        print(f'processing {item}') # not needed for lambda
         mcs_melter_aws(item)
-        print(f'Processing complete in {time.time()-start_time} seconds')
+        print(f'Processing complete in {time.time()-start_time} seconds') # not needed for lambda
 
 if __name__=='__main__':
     s3_melt_parquet()
